@@ -64,26 +64,34 @@ class NPM3DDataset(PointCloudDataset):
         ############
 
         # Dict from labels to names
-        self.label_to_names = {0: 'unclassified',
-                               1: 'ground',
-                               2: 'building',
-                               3: 'pole',       # pole - road sign - traffic light
-                               4: 'bollard',    # bollard - small pole
-                               5: 'trash',      # trash can
-                               6: 'barrier',
-                               7: 'pedestrian',
-                               8: 'car',
-                               9: 'natural'     # natural - vegetation
+        self.label_to_names = {0: "never_classified",
+                               1: 'unclassified',
+                               2: 'ground',
+                               3: 'low_veg',
+                               4: 'med_veg',
+                               5: 'high_veg',
+                               6: 'building',
+                               7: 'noise',
+                               8: 'reserved',
+                               9: 'water',
+                               10: 'rail',
+                               11: 'road',
+                               12: 'overlap',
+                               13: 'wire',
+                               14: 'wire2',
+                               15: 'trans_tower',
+                               16: 'wire3',
+                               17: 'bridge_deck',
+                               18: 'high_noise'
                                }
-
         # Initialize a bunch of variables concerning class labels
         self.init_labels()
 
         # List of classes ignored during training (can be empty)
-        self.ignored_labels = np.array([0])
+        self.ignored_labels = np.array([0,1,3,4,5,7,8,10,11,12,13,14,15,16,18])
 
         # Dataset folder
-        self.path = '../../Data/Paris'
+        self.path = '/mnt/data/'
 
         # Type of task conducted on this dataset
         self.dataset_task = 'cloud_segmentation'
@@ -103,21 +111,22 @@ class NPM3DDataset(PointCloudDataset):
 
         # Path of the training files
         # self.train_path = 'original_ply'
-        self.train_path = 'train'
+        # self.train_path = 'train'
         self.original_ply_path = 'original_ply'
+        self.train_path = 'train'
 
         # List of files to process
         ply_path = join(self.path, self.train_path)
 
         # Proportion of validation scenes
-        self.cloud_names = ['Lille1_1', 'Lille1_2', 'Lille2', 'Paris', 'ajaccio_2', 'ajaccio_57', 'dijon_9']
-        self.all_splits = [0, 1, 2, 3, 4, 5, 6]
-        self.validation_split = 1
-        # self.test_cloud_names = ['ajaccio_2', 'ajaccio_57', 'dijon_9']
-        self.test_splits = [4, 5, 6]
-        self.train_splits = [0, 2, 3]
+        #self.cloud_names = ['Lille1_1', 'Lille1_2', 'Lille2', 'Paris', 'ajaccio_2', 'ajaccio_57', 'dijon_9']
+        self.cloud_names = ['E2730_N52400', 'E2750_N52340', 'E2870_N52560', 'E3290_N52720']
+        self.all_splits = [0, 1, 2, 3]
+        self.validation_split = 3
+        self.test_splits = 2
+        self.train_splits = [0, 1]
 
-        # Number of models used per epoch
+        #Number of models used per epoch
         if self.set == 'training':
             self.epoch_n = config.epoch_steps * config.batch_num
         elif self.set in ['validation', 'test', 'ERF']:
@@ -694,7 +703,8 @@ class NPM3DDataset(PointCloudDataset):
                 write_ply(join(ply_path, cloud_name + '.ply'), cloud_points, field_names)
 
             else:
-                labels = original_ply['class']
+                #labels = original_ply['class']
+                labels = original_ply['scalar_Classification']
                 labels = labels.astype(np.int32)
                 labels = labels.reshape(len(labels), 1)
 
