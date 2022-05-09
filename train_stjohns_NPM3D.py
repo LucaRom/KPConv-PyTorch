@@ -99,7 +99,7 @@ class NPM3DConfig(Config):
     num_kernel_points = 15
 
     # Radius of the input sphere (decrease value to reduce memory cost)
-    in_radius = 10
+    in_radius = 5
     #in_radius = 1.5
 
     # Size of the first subsampling grid in meter (increase value to reduce memory cost)
@@ -149,18 +149,19 @@ class NPM3DConfig(Config):
     max_epoch = 5
 
     # Learning rate management
-    learning_rate = 1e-2
+    #learning_rate = 1e-2
+    learning_rate = 1e-3
     momentum = 0.98
     lr_decays = {i: 0.1 ** (1 / 150) for i in range(1, max_epoch)}
     grad_clip_norm = 100.0
 
     # Number of batch (decrease to reduce memory cost, but it should remain > 3 for stability)
     #batch_num = 6
-    batch_num = 4
+    batch_num = 6
 
     # Number of steps per epochs
     #epoch_steps = 500
-    epoch_steps = 50
+    epoch_steps = 500
 
     # Number of validation examples per epoch
     validation_size = 50
@@ -181,7 +182,8 @@ class NPM3DConfig(Config):
     #   > 'none': Each point in the whole batch has the same contribution.
     #   > 'class': Each class has the same contribution (points are weighted according to class balance)
     #   > 'batch': Each cloud in the batch has the same contribution (points are weighted according cloud sizes)
-    segloss_balance = 'none'
+    #segloss_balance = 'none'
+    segloss_balance = 'batch'
 
     # Do we nee to save convergence
     saving = True

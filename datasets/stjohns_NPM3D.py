@@ -27,6 +27,7 @@ import time
 import numpy as np
 import pickle
 import torch
+import laspy
 import math
 import warnings
 from multiprocessing import Lock
@@ -64,31 +65,55 @@ class NPM3DDataset(PointCloudDataset):
         ############
 
         # Dict from labels to names
-        self.label_to_names = {0: "never_classified",
-                               1: 'unclassified',
-                               2: 'ground',
-                               3: 'low_veg',
-                               4: 'med_veg',
-                               5: 'high_veg',
-                               6: 'building',
-                               7: 'noise',
-                               8: 'reserved',
-                               9: 'water',
-                               10: 'rail',
-                               11: 'road',
-                               12: 'overlap',
-                               13: 'wire',
-                               14: 'wire2',
-                               15: 'trans_tower',
-                               16: 'wire3',
-                               17: 'bridge_deck',
-                               18: 'high_noise'
+        # self.label_to_names = {0: "never_classified",
+        #                        1: 'unclassified',
+        #                        2: 'ground',
+        #                        3: 'low_veg',
+        #                        4: 'med_veg',
+        #                        5: 'high_veg',
+        #                        6: 'building',
+        #                        7: 'noise',
+        #                        8: 'reserved',
+        #                        9: 'water',
+        #                        10: 'rail',
+        #                        11: 'road',
+        #                        12: 'overlap',
+        #                        13: 'wire',
+        #                        14: 'wire2',
+        #                        15: 'trans_tower',
+        #                        16: 'wire3',
+        #                        17: 'bridge_deck',
+        #                        18: 'high_noise'
+        #                        }
+
+        # self.label_to_names = {1: 'unclassified', # 0
+        #                        2: 'ground',
+        #                        6: 'building',
+        #                        7: 'noise',
+        #                        9: 'water',
+        #                        17: 'bridge_deck',
+        #                        18: 'high_noise'   # 6
+        #                        }
+
+        self.label_to_names = {0: 'unclassified', # 1
+                               1: 'ground',       # 2
+                               2: 'building',     # 6
+                               3: 'noise',        # 7
+                               4: 'water',        # 9
+                               5: 'bridge_deck',  # 17
+                               6: 'high_noise'    # 18
                                }
+
+        #dictionnaire poru référence {1 : 0, 2 : 1, 6 : 2, 7 : 3, 9 : 4, 17 : 5}
+
         # Initialize a bunch of variables concerning class labels
         self.init_labels()
 
         # List of classes ignored during training (can be empty)
-        self.ignored_labels = np.array([0,1,3,4,5,7,8,10,11,12,13,14,15,16,18])
+        #self.ignored_labels = np.array([0,1,3,4,5,7,8,10,11,12,13,14,15,16,18])
+        #self.ignored_labels = np.array([1, 18])
+        #self.ignored_labels = np.array([0, 6])
+        self.ignored_labels = np.array([0, 3, 6])
 
         # Dataset folder
         self.path = '/mnt/data/'
@@ -589,7 +614,8 @@ class NPM3DDataset(PointCloudDataset):
             #   input_colors *= 0
 
             # Get original height as additional feature
-            input_features = np.hstack((input_colors, input_points[:, 2:] + center_point[:, 2:])).astype(np.float32)
+            #input_features = np.hstack((input_colors, input_points[:, 2:] + center_point[:, 2:])).astype(np.float32)
+            input_features = np.hstack((input_points[:, 2:] + center_point[:, 2:])).astype(np.float32)
 
             # Stack batch
             p_list += [input_points]
@@ -670,10 +696,16 @@ class NPM3DDataset(PointCloudDataset):
 
             # Pass if the cloud has already been computed
             cloud_file = join(ply_path, cloud_name + '.ply')
+            #cloud_file = join(ply_path, cloud_name + '.las')
             if exists(cloud_file):
                 continue
 
             original_ply = read_ply(join(self.path, self.original_ply_path, cloud_name + '.ply'))
+            
+            # filtering class 18 out (LR)
+            original_ply = original_ply[original_ply['scalar_Classification'] != 18]
+            original_ply = original_ply[original_ply['scalar_Classification'] != 0]
+            original_ply = original_ply[original_ply['scalar_Classification'] != 1]
 
             # Initiate containers
             cloud_x = original_ply['x']
@@ -704,9 +736,20 @@ class NPM3DDataset(PointCloudDataset):
 
             else:
                 #labels = original_ply['class']
-                labels = original_ply['scalar_Classification']
+                labels = original_ply['scalar_Classification'] 
                 labels = labels.astype(np.int32)
-                labels = labels.reshape(len(labels), 1)
+
+                # Remap labels - LR
+                remap_dict = {1 : 0, 2 : 1, 6 : 2, 7 : 3, 9 : 4, 17 : 5}
+                k = np.array(list(remap_dict.keys()))
+                v = np.array(list(remap_dict.values()))   
+
+                out = np.zeros_like(labels)
+
+                for key, val in zip(k,v):
+                    out[labels==key] = val
+
+                labels = out.reshape(len(labels), 1)
 
                 # Save as ply
                 field_names = ['x', 'y', 'z', 'class']
