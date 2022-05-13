@@ -156,6 +156,9 @@ class ModelTrainer:
         last_display = time.time()
         mean_dt = np.zeros(1)
 
+        # Tentative de caster en float16 - LR
+        scaler = torch.cuda.amp.GradScaler()
+
         # Start training loop
         for epoch in range(config.max_epoch):
 
@@ -185,20 +188,23 @@ class ModelTrainer:
                 self.optimizer.zero_grad()
 
                 # Forward pass
-                outputs = net(batch, config)
-                loss = net.loss(outputs, batch.labels)
-                acc = net.accuracy(outputs, batch.labels)
+                with torch.cuda.amp.autocast():    # modif mixed precision
+                    outputs = net(batch, config)
+                    loss = net.loss(outputs, batch.labels)
+                    acc = net.accuracy(outputs, batch.labels)
 
                 t += [time.time()]
 
                 # Backward + optimize
-                loss.backward()
+                #loss.backward()
+                scaler.scale(loss).backward() # MP change
 
                 if config.grad_clip_norm > 0:
                     #torch.nn.utils.clip_grad_norm_(net.parameters(), config.grad_clip_norm)
                     torch.nn.utils.clip_grad_value_(net.parameters(), config.grad_clip_norm)
-                self.optimizer.step()
-
+                #self.optimizer.step()
+                scaler.step(self.optimizer)   # MP change
+                scaler.update()               # MP change
                 
                 torch.cuda.empty_cache()
                 torch.cuda.synchronize(self.device)
@@ -271,7 +277,8 @@ class ModelTrainer:
 
             # Validation
             net.eval()
-            self.validation(net, val_loader, config)
+            with torch.no_grad():   # MP modifs
+                self.validation(net, val_loader, config)
             net.train()
 
         print('Finished Training')
