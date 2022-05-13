@@ -105,6 +105,7 @@ class NPM3DDataset(PointCloudDataset):
                                }
 
         #dictionnaire poru référence {1 : 0, 2 : 1, 6 : 2, 7 : 3, 9 : 4, 17 : 5}
+        #remap_dict = {1 : 0, 2 : 1, 6 : 2, 7 : 3, 9 : 4, 17 : 5, 18 : 6}
 
         # Initialize a bunch of variables concerning class labels
         self.init_labels()
@@ -113,7 +114,8 @@ class NPM3DDataset(PointCloudDataset):
         #self.ignored_labels = np.array([0,1,3,4,5,7,8,10,11,12,13,14,15,16,18])
         #self.ignored_labels = np.array([1, 18])
         #self.ignored_labels = np.array([0, 6])
-        self.ignored_labels = np.array([0, 3, 6])
+        #self.ignored_labels = np.array([0, 3, 6])
+        self.ignored_labels = np.array([])
 
         # Dataset folder
         self.path = '/mnt/data/'
@@ -137,19 +139,50 @@ class NPM3DDataset(PointCloudDataset):
         # Path of the training files
         # self.train_path = 'original_ply'
         # self.train_path = 'train'
+        self.original_las_path = 'original_las'
         self.original_ply_path = 'original_ply'
         self.train_path = 'train'
+        self.val_path = 'val'
+        self.test_path = 'test'
 
         # List of files to process
-        ply_path = join(self.path, self.train_path)
+        '''
+        ply_path = Folder to files created after prepare_NPM3D_ply() function 
+                   and used for training
+        las_path = Folder to original .las files
+        
+        '''
+
+        ply_path = join(self.path, self.train_path)          
+        #las_path = join(self.path, self.original_las_path)
+
 
         # Proportion of validation scenes
         #self.cloud_names = ['Lille1_1', 'Lille1_2', 'Lille2', 'Paris', 'ajaccio_2', 'ajaccio_57', 'dijon_9']
-        self.cloud_names = ['E2730_N52400', 'E2750_N52340', 'E2870_N52560', 'E3290_N52720']
-        self.all_splits = [0, 1, 2, 3]
-        self.validation_split = 3
-        self.test_splits = 2
-        self.train_splits = [0, 1]
+        #self.cloud_names = ['E2730_N52400', 'E2750_N52340', 'E2870_N52560', 'E3290_N52720']
+        # self.all_splits = [0, 1, 2, 3]
+        # self.validation_split = 3
+        # self.test_splits = 2
+        # self.train_splits = [0, 1]
+
+        # With original files in .las
+        self.cloud_names = ['E2730_N52400', 'E2750_N52340', 'E2750_N52370', 
+                            'E3230_N53080', 'E3280_N52680', 'E3290_N52760',
+                            'E3300_N52710', 'E3320_N52890', 'E3390_N52500',
+                            'E3390_N52510', 'E3430_N52590', 'E3460_N52620',
+                            'E3470_N52620', 'E3620_N52400', 'E3660_N52590',
+                            'E3690_N52700', 'E3710_N52580', 'E3710_N52680',
+                            'E3710_N52690', 'E3720_N52700', 'E3720_N52740',
+                            'E3730_N52710', 'E3290_N52720', 'E3670_N52780',
+                            'E3720_N52710', 'E2870_N52560', 'E3230_N53040',
+                            'E3330_N52880', 'E3450_N52610', 'E3510_N52170',
+                            'E3720_N52690']
+
+        # very clunky # TODO
+        self.all_splits = list(range(len(self.cloud_names)))
+        self.validation_split = 24
+        self.test_splits = [25, 26, 27, 28, 29, 30]
+        self.train_splits = list(range(24))
 
         #Number of models used per epoch
         if self.set == 'training':
@@ -695,22 +728,34 @@ class NPM3DDataset(PointCloudDataset):
         for cloud_name in self.cloud_names:
 
             # Pass if the cloud has already been computed
-            cloud_file = join(ply_path, cloud_name + '.ply')
-            #cloud_file = join(ply_path, cloud_name + '.las')
+            #cloud_file = join(ply_path, cloud_name + '.ply')
+            cloud_file = join(ply_path, cloud_name + '.las')
             if exists(cloud_file):
                 continue
 
-            original_ply = read_ply(join(self.path, self.original_ply_path, cloud_name + '.ply'))
-            
-            # filtering class 18 out (LR)
-            original_ply = original_ply[original_ply['scalar_Classification'] != 18]
-            original_ply = original_ply[original_ply['scalar_Classification'] != 0]
-            original_ply = original_ply[original_ply['scalar_Classification'] != 1]
+            #original_ply = read_ply(join(self.path, self.original_ply_path, cloud_name + '.ply'))
+            original_las =  laspy.read(join(self.path, self.original_las_path, cloud_name + '.las'))
 
-            # Initiate containers
-            cloud_x = original_ply['x']
-            cloud_y = original_ply['y']
-            cloud_z = original_ply['z']
+            # filtering class 18 out (LR)
+            #original_ply = original_ply[original_ply['scalar_Classification'] != 18]
+            #original_ply = original_ply[original_ply['scalar_Classification'] != 0]
+            #original_ply = original_ply[original_ply['scalar_Classification'] != 1]
+
+            # # Initiate containers
+            # cloud_x = original_ply['x'] # class 'numpy.ndarray' , dtype('float64')
+            # cloud_y = original_ply['y']
+            # cloud_z = original_ply['z']
+
+            # # WARNING, ONLY TEMPORARY, Y AND Z ARE INVERSE IN RAW DATA
+            # cloud_x = original_ply['x']
+            # cloud_y = original_ply['z']
+            # cloud_z = original_ply['y']
+
+            # FOR LAS
+            cloud_x = original_las.x
+            cloud_y = original_las.y
+            cloud_z = original_las.z
+
             cloud_x = cloud_x - (cloud_x.min())
             cloud_y = cloud_y - (cloud_y.min())
             cloud_z = cloud_z - (cloud_z.min())
@@ -736,11 +781,12 @@ class NPM3DDataset(PointCloudDataset):
 
             else:
                 #labels = original_ply['class']
-                labels = original_ply['scalar_Classification'] 
+                #labels = original_ply['scalar_Classification'] # class 'numpy.ndarray' , dtype('float32')
+                labels = np.array(original_las.classification)
                 labels = labels.astype(np.int32)
 
                 # Remap labels - LR
-                remap_dict = {1 : 0, 2 : 1, 6 : 2, 7 : 3, 9 : 4, 17 : 5}
+                remap_dict = {1 : 0, 2 : 1, 6 : 2, 7 : 3, 9 : 4, 17 : 5, 18 : 6}
                 k = np.array(list(remap_dict.keys()))
                 v = np.array(list(remap_dict.values()))   
 
@@ -1697,8 +1743,8 @@ def debug_show_clouds(dataset, loader):
             print(batch.scales.dtype, batch.scales.shape)
             print('\nAugment Rotations')
             print(batch.rots.dtype, batch.rots.shape)
-            print('\nModel indices')
-            print(batch.model_inds.dtype, batch.model_inds.shape)
+            #print('\nModel indices')
+            #print(batch.model_inds.dtype, batch.model_inds.shape)
 
             print('\nAre input tensors pinned')
             print(batch.neighbors[0].is_pinned())
@@ -1708,7 +1754,7 @@ def debug_show_clouds(dataset, loader):
             print(batch.labels.is_pinned())
             print(batch.scales.is_pinned())
             print(batch.rots.is_pinned())
-            print(batch.model_inds.is_pinned())
+            #print(batch.model_inds.is_pinned())
 
             show_input_batch(batch)
 

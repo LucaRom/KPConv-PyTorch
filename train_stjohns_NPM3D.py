@@ -67,7 +67,30 @@ class NPM3DConfig(Config):
     # Architecture definition
     #########################
 
-    # # Define layers
+    # # # Define layers
+    # architecture = ['simple',
+    #                 'resnetb',
+    #                 'resnetb_strided',
+    #                 'resnetb',
+    #                 'resnetb',
+    #                 'resnetb_strided',
+    #                 'resnetb',
+    #                 'resnetb',
+    #                 'resnetb_strided',
+    #                 'resnetb',
+    #                 'resnetb',
+    #                 'resnetb_strided',
+    #                 'resnetb',
+    #                 'resnetb',
+    #                 'nearest_upsample',
+    #                 'unary',
+    #                 'nearest_upsample',
+    #                 'unary',
+    #                 'nearest_upsample',
+    #                 'unary',
+    #                 'nearest_upsample',
+    #                 'unary']
+
     architecture = ['simple',
                     'resnetb',
                     'resnetb_strided',
@@ -77,11 +100,11 @@ class NPM3DConfig(Config):
                     'resnetb',
                     'resnetb',
                     'resnetb_strided',
-                    'resnetb',
-                    'resnetb',
-                    'resnetb_strided',
-                    'resnetb',
-                    'resnetb',
+                    'resnetb_deformable',
+                    'resnetb_deformable',
+                    'resnetb_deformable_strided',
+                    'resnetb_deformable',
+                    'resnetb_deformable',
                     'nearest_upsample',
                     'unary',
                     'nearest_upsample',
@@ -99,12 +122,13 @@ class NPM3DConfig(Config):
     num_kernel_points = 15
 
     # Radius of the input sphere (decrease value to reduce memory cost)
-    in_radius = 5
+    # Units = meters
+    in_radius = 15
     #in_radius = 1.5
 
     # Size of the first subsampling grid in meter (increase value to reduce memory cost)
     #first_subsampling_dl = 0.06
-    first_subsampling_dl = 0.02
+    first_subsampling_dl = 0.2
 
     # Radius of convolution in "number grid cell". (2.5 is the standard value)
     conv_radius = 2.5
@@ -146,21 +170,20 @@ class NPM3DConfig(Config):
 
     # Maximal number of epochs
     #max_epoch = 500
-    max_epoch = 5
+    max_epoch = 50
 
     # Learning rate management
-    #learning_rate = 1e-2
-    learning_rate = 1e-3
+    learning_rate = 1e-2
+    #learning_rate = 1e-3
     momentum = 0.98
     lr_decays = {i: 0.1 ** (1 / 150) for i in range(1, max_epoch)}
     grad_clip_norm = 100.0
 
     # Number of batch (decrease to reduce memory cost, but it should remain > 3 for stability)
     #batch_num = 6
-    batch_num = 6
+    batch_num = 3
 
     # Number of steps per epochs
-    #epoch_steps = 500
     epoch_steps = 500
 
     # Number of validation examples per epoch
@@ -178,12 +201,16 @@ class NPM3DConfig(Config):
     augment_noise = 0.001
     augment_color = 0.8
 
+    # Weights
+    # n_points / (num_classes * num_points(class)
+    class_w = [0.314, 0.341, 2.411, 832.103, 2.129, 174.947, 875.551]
+
     # The way we balance segmentation loss
     #   > 'none': Each point in the whole batch has the same contribution.
     #   > 'class': Each class has the same contribution (points are weighted according to class balance)
     #   > 'batch': Each cloud in the batch has the same contribution (points are weighted according cloud sizes)
-    #segloss_balance = 'none'
-    segloss_balance = 'batch'
+    segloss_balance = 'none'
+    #segloss_balance = 'class'
 
     # Do we nee to save convergence
     saving = True
@@ -255,6 +282,8 @@ if __name__ == '__main__':
     # Initialize datasets
     training_dataset = NPM3DDataset(config, set='training', use_potentials=True)
     test_dataset = NPM3DDataset(config, set='validation', use_potentials=True)
+    # training_dataset = NPM3DDataset(config, set='training', use_potentials=False)
+    # test_dataset = NPM3DDataset(config, set='validation', use_potentials=False)
 
     # Initialize samplers
     training_sampler = NPM3DSampler(training_dataset)
@@ -267,6 +296,7 @@ if __name__ == '__main__':
                                  collate_fn=NPM3DCollate,
                                  num_workers=config.input_threads,
                                  pin_memory=True)
+
     test_loader = DataLoader(test_dataset,
                              batch_size=1,
                              sampler=test_sampler,
@@ -282,6 +312,8 @@ if __name__ == '__main__':
     # debug_timing(training_dataset, training_loader)
     # debug_timing(test_dataset, test_loader)
     # debug_upsampling(training_dataset, training_loader)
+    #debug_show_clouds(training_dataset, training_loader)
+    #debug_batch_and_neighbors_calib(training_dataset, training_loader)
 
     print('\nModel Preparation')
     print('*****************')
