@@ -40,6 +40,7 @@ from utils.ply import read_ply
 from datasets.ModelNet40 import ModelNet40Dataset
 from datasets.S3DIS import S3DISDataset
 from datasets.SemanticKitti import SemanticKittiDataset
+from datasets.stjohns_NPM3D import NPM3DDataset
 
 # ----------------------------------------------------------------------------------------------------------------------
 #
@@ -434,7 +435,7 @@ def compare_convergences_segment(dataset, list_of_paths, list_of_names=None):
     ax.grid(linestyle='-.', which='both')
     #ax.set_yticks(np.arange(0.8, 1.02, 0.02))
 
-    displayed_classes = [0, 1, 2, 3, 4, 5, 6, 7]
+    #displayed_classes = [0, 1, 2, 3, 4, 5, 6, 7]
     displayed_classes = []
     for c_i, c_name in enumerate(class_list):
         if c_i in displayed_classes:
@@ -668,8 +669,8 @@ def compare_convergences_SLAM(dataset, list_of_paths, list_of_names=None):
     ax.grid(linestyle='-.', which='both')
     #ax.set_yticks(np.arange(0.8, 1.02, 0.02))
 
-    displayed_classes = [0, 1, 2, 3, 4, 5, 6, 7]
-    #displayed_classes = []
+    #displayed_classes = [0, 1, 2, 3, 4, 5, 6]
+    displayed_classes = []
     for c_i, c_name in enumerate(class_list):
         if c_i in displayed_classes:
 
@@ -713,8 +714,8 @@ def experiment_name_1():
     """
 
     # Using the dates of the logs, you can easily gather consecutive ones. All logs should be of the same dataset.
-    start = 'Log_2020-04-22_11-52-58'
-    end = 'Log_2023-07-29_12-40-27'
+    start = 'Log_2022-05-17_06-19-09'
+    end = 'Log_2022-05-17_06-19-09'
 
     # Name of the result path
     res_path = 'results'
@@ -723,11 +724,15 @@ def experiment_name_1():
     logs = np.sort([join(res_path, l) for l in listdir_str(res_path) if start <= l <= end])
 
     # Give names to the logs (for plot legends)
-    logs_names = ['name_log_1',
-                  'name_log_2',
-                  'name_log_3',
-                  'name_log_4']
+    # logs_names = ['name_log_1',
+    #               'name_log_2',
+    #               'name_log_3',
+    #               'name_log_4']
 
+    logs_names = ['name_log_1']
+
+    # logs_names = ['500 epochs']
+    
     # safe check log names
     logs_names = np.array(logs_names[:len(logs)])
 
@@ -743,8 +748,8 @@ def experiment_name_2():
     """
 
     # Using the dates of the logs, you can easily gather consecutive ones. All logs should be of the same dataset.
-    start = 'Log_2020-04-22_11-52-58'
-    end = 'Log_2020-05-22_11-52-58'
+    start = 'Log_2022-05-12_22-36-34'
+    end = 'Log_2022-05-12_23-17-48'
 
     # Name of the result path
     res_path = 'results'
@@ -807,6 +812,7 @@ if __name__ == '__main__':
 
     # Plot the training loss and accuracy
     compare_trainings(logs, logs_names)
+    #compare_convergences_classif(logs, logs_names)
 
     # Plot the validation
     if config.dataset_task == 'classification':
@@ -814,6 +820,9 @@ if __name__ == '__main__':
     elif config.dataset_task == 'cloud_segmentation':
         if config.dataset.startswith('S3DIS'):
             dataset = S3DISDataset(config, load_data=False)
+            compare_convergences_segment(dataset, logs, logs_names)
+        else:
+            dataset = NPM3DDataset(config, load_data=False)
             compare_convergences_segment(dataset, logs, logs_names)
     elif config.dataset_task == 'slam_segmentation':
         if config.dataset.startswith('SemanticKitti'):

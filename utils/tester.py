@@ -173,7 +173,8 @@ class ModelTester:
 
         return
 
-    def cloud_segmentation_test(self, net, test_loader, config, num_votes=100, debug=False):
+    #def cloud_segmentation_test(self, net, test_loader, config, num_votes=100, debug=False):
+    def cloud_segmentation_test(self, net, test_loader, config, num_votes=10, debug=False):
         """
         Test method for cloud segmentation models
         """
@@ -249,7 +250,8 @@ class ModelTester:
                     batch.to(self.device)
 
                 # Forward pass
-                outputs = net(batch, config)
+                with torch.no_grad():  #modif LR
+                    outputs = net(batch, config)
 
                 t += [time.time()]
 
@@ -301,7 +303,7 @@ class ModelTester:
 
             # Update minimum od potentials
             new_min = torch.min(test_loader.dataset.min_potentials)
-            print('Test epoch {:d}, end. Min potential = {:.1f}'.format(test_epoch, new_min))
+            print('Test epoch {:d}, end. Min potential = {:.1f}, Last Min = {:.1f}'.format(test_epoch, new_min, last_min))
             #print([np.mean(pots) for pots in test_loader.dataset.potentials])
 
             # Save predicted cloud
@@ -352,7 +354,8 @@ class ModelTester:
                     print(s + '\n')
 
                 # Save real IoU once in a while
-                if int(np.ceil(new_min)) % 10 == 0:
+                #if int(np.ceil(new_min)) % 10 == 0:
+                if int(np.ceil(new_min)) % 0.5 == 0:
 
                     # Project predictions
                     print('\nReproject Vote #{:d}'.format(int(np.floor(new_min))))

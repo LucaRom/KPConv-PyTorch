@@ -68,6 +68,7 @@ class NPM3DConfig(Config):
     #########################
 
     # # # Define layers
+    # # Rigid
     # architecture = ['simple',
     #                 'resnetb',
     #                 'resnetb_strided',
@@ -91,6 +92,7 @@ class NPM3DConfig(Config):
     #                 'nearest_upsample',
     #                 'unary']
 
+    # Deformable
     architecture = ['simple',
                     'resnetb',
                     'resnetb_strided',
@@ -170,7 +172,7 @@ class NPM3DConfig(Config):
 
     # Maximal number of epochs
     #max_epoch = 500
-    max_epoch = 50
+    max_epoch = 500
 
     # Learning rate management
     learning_rate = 1e-2
@@ -203,7 +205,8 @@ class NPM3DConfig(Config):
 
     # Weights
     # n_points / (num_classes * num_points(class)
-    class_w = [0.314, 0.341, 2.411, 832.103, 2.129, 174.947, 875.551]
+    #class_w = [0.314, 0.341, 2.411, 832.103, 2.129, 174.947, 875.551] # 7 classes
+    class_w = [0.317, 0.339, 2.291, 2.178, 168.501] #  5 classes (!= bruits)
 
     # The way we balance segmentation loss
     #   > 'none': Each point in the whole batch has the same contribution.

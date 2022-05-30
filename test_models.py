@@ -32,6 +32,7 @@ import torch
 from datasets.ModelNet40 import *
 from datasets.S3DIS import *
 from datasets.SemanticKitti import *
+from datasets.stjohns_NPM3D import *
 from torch.utils.data import DataLoader
 
 from utils.config import Config
@@ -95,13 +96,13 @@ if __name__ == '__main__':
     #       > 'last_XXX': Automatically retrieve the last trained model on dataset XXX
     #       > '(old_)results/Log_YYYY-MM-DD_HH-MM-SS': Directly provide the path of a trained model
 
-    chosen_log = 'results/Light_KPFCNN'
+    chosen_log = 'results/Log_2022-05-17_06-19-09'
 
     # Choose the index of the checkpoint to load OR None if you want to load the current checkpoint
     chkp_idx = -1
 
     # Choose to test on validation or test split
-    on_val = True
+    on_val = False
 
     # Deal with 'last_XXXXXX' choices
     chosen_log = model_choice(chosen_log)
@@ -143,10 +144,10 @@ if __name__ == '__main__':
 
     #config.augment_noise = 0.0001
     #config.augment_symmetries = False
-    #config.batch_num = 3
-    #config.in_radius = 4
+    config.batch_num = 3
+    config.in_radius = 15
     config.validation_size = 200
-    config.input_threads = 10
+    config.input_threads = 1
 
     ##############
     # Prepare Data
@@ -174,6 +175,10 @@ if __name__ == '__main__':
         test_dataset = SemanticKittiDataset(config, set=set, balance_classes=False)
         test_sampler = SemanticKittiSampler(test_dataset)
         collate_fn = SemanticKittiCollate
+    elif config.dataset == 'stjohns':
+        test_dataset = NPM3DDataset(config, set=set, use_potentials=True)
+        test_sampler = NPM3DSampler(test_dataset)
+        collate_fn = NPM3DCollate
     else:
         raise ValueError('Unsupported dataset : ' + config.dataset)
 

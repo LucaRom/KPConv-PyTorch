@@ -115,10 +115,11 @@ class NPM3DDataset(PointCloudDataset):
         #self.ignored_labels = np.array([1, 18])
         #self.ignored_labels = np.array([0, 6])
         #self.ignored_labels = np.array([0, 3, 6])
-        self.ignored_labels = np.array([])
+        self.ignored_labels = np.array([3, 6])
 
         # Dataset folder
-        self.path = '/mnt/data/'
+        #self.path = '/mnt/data/' # Path windows
+        self.path = '/media/luca/SN750/00_Donnees_SSD/02_CCCOT/st_johns_lidar/raw_ply'
 
         # Type of task conducted on this dataset
         self.dataset_task = 'cloud_segmentation'
@@ -737,9 +738,14 @@ class NPM3DDataset(PointCloudDataset):
             original_las =  laspy.read(join(self.path, self.original_las_path, cloud_name + '.las'))
 
             # filtering class 18 out (LR)
-            #original_ply = original_ply[original_ply['scalar_Classification'] != 18]
+            
             #original_ply = original_ply[original_ply['scalar_Classification'] != 0]
             #original_ply = original_ply[original_ply['scalar_Classification'] != 1]
+            # original_ply = original_ply[original_ply['scalar_Classification'] != 7]
+            # original_ply = original_ply[original_ply['scalar_Classification'] != 18]
+
+            original_las = original_las[original_las.classification != 18]
+            original_las = original_las[original_las.classification != 7]
 
             # # Initiate containers
             # cloud_x = original_ply['x'] # class 'numpy.ndarray' , dtype('float64')
