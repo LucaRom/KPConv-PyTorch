@@ -714,14 +714,26 @@ def experiment_name_1():
     """
 
     # Using the dates of the logs, you can easily gather consecutive ones. All logs should be of the same dataset.
-    start = 'Log_2022-05-17_06-19-09'
-    end = 'Log_2022-05-17_06-19-09'
+    start = 'Log_2022-05-30_05-29-07'
+    end = 'Log_2022-06-01_03-19-50'
 
     # Name of the result path
-    res_path = 'results'
+    res_path = 'results/00_st_johns_hpc/logs_kpconv/logs_kpconv'
 
-    # Gather logs and sort by date
-    logs = np.sort([join(res_path, l) for l in listdir_str(res_path) if start <= l <= end])
+    # Gather logs and sort by date 
+
+    # Tous les logs
+    #logs = np.sort([join(res_path, l) for l in listdir_str(res_path) if start <= l <= end])
+
+    # Juste les logs 100 epochs
+    logs  = ['results/00_st_johns_hpc/logs_kpconv/logs_kpconv/Log_2022-05-30_05-53-18',     # '100_20_020'
+             'results/00_st_johns_hpc/logs_kpconv/logs_kpconv/Log_2022-05-30_14-46-07',     # '100_14_010
+             'results/00_st_johns_hpc/logs_kpconv/logs_kpconv/Log_2022-05-30_14-46-07',     # '100_14_010'   
+             'results/00_st_johns_hpc/logs_kpconv/logs_kpconv/Log_2022-05-31_06-51-50',     # '100_25_025'
+             'results/00_st_johns_hpc/logs_kpconv/logs_kpconv/Log_2022-05-31_12-48-58',     # '100_20_020'
+             'results/00_st_johns_hpc/logs_kpconv/logs_kpconv/Log_2022-05-31_18-00-20',     # '100_25_030'
+             'results/00_st_johns_hpc/logs_kpconv/logs_kpconv/Log_2022-05-31_23-32-49',     # '100_30_050'
+             'results/00_st_johns_hpc/logs_kpconv/logs_kpconv/Log_2022-06-01_03-19-50']     # '100_30_050'                  ]
 
     # Give names to the logs (for plot legends)
     # logs_names = ['name_log_1',
@@ -729,10 +741,39 @@ def experiment_name_1():
     #               'name_log_3',
     #               'name_log_4']
 
-    logs_names = ['name_log_1']
+    #logs_names = ['name_log_1']
 
     # logs_names = ['500 epochs']
     
+    # Tous les bons logs
+    # logs_names = ['005_20_020',    # Log_2022-05-30_05-29-07
+    #               '100_20_020',    # Log_2022-05-30_05-53-18
+    #               '005_14_010',    # Log_2022-05-30_14-16-44
+    #               '100_14_010',    # Log_2022-05-30_14-46-07
+    #               '005_14_009',    # Log_2022-05-30_20-35-31
+    #               '005_12_008',    # Log_2022-05-30_22-10-46
+    #               '005_12_007',    # Log_2022-05-31_00-00-02
+    #               '005_11_006',    # Log_2022-05-31_01-04-02
+    #               '005_11_005',    # Log_2022-05-31_02-14-29
+    #               '005_11_004',    # Log_2022-05-31_03-09-01
+    #               '005_25_030',    # Log_2022-05-31_05-32-56
+    #               '005_25_025',    # Log_2022-05-31_06-06-11
+    #               '100_25_025',    # Log_2022-05-31_06-51-50
+    #               '100_20_020',    # Log_2022-05-31_12-48-58
+    #               '100_25_030',    # Log_2022-05-31_18-00-20
+    #               '005_30_050',    # Log_2022-05-31_23-15-57
+    #               '100_30_050',    # Log_2022-05-31_23-32-49
+    #               '100_30_050']    # Log_2022-06-01_03-19-50
+
+    # Logs avec 100 epochs
+    logs_names = ['100_20_020',    # Log_2022-05-30_05-53-18
+                  '100_14_010',    # Log_2022-05-30_14-46-07
+                  '100_25_025',    # Log_2022-05-31_06-51-50
+                  '100_20_020',    # Log_2022-05-31_12-48-58
+                  '100_25_030',    # Log_2022-05-31_18-00-20
+                  '100_30_050',    # Log_2022-05-31_23-32-49
+                  '100_30_050_8']    # Log_2022-06-01_03-19-50
+
     # safe check log names
     logs_names = np.array(logs_names[:len(logs)])
 
@@ -812,24 +853,25 @@ if __name__ == '__main__':
 
     # Plot the training loss and accuracy
     compare_trainings(logs, logs_names)
-    #compare_convergences_classif(logs, logs_names)
+    dataset = NPM3DDataset(config, load_data=False)
+    compare_convergences_segment(dataset, logs, logs_names)
 
-    # Plot the validation
-    if config.dataset_task == 'classification':
-        compare_convergences_classif(logs, logs_names)
-    elif config.dataset_task == 'cloud_segmentation':
-        if config.dataset.startswith('S3DIS'):
-            dataset = S3DISDataset(config, load_data=False)
-            compare_convergences_segment(dataset, logs, logs_names)
-        else:
-            dataset = NPM3DDataset(config, load_data=False)
-            compare_convergences_segment(dataset, logs, logs_names)
-    elif config.dataset_task == 'slam_segmentation':
-        if config.dataset.startswith('SemanticKitti'):
-            dataset = SemanticKittiDataset(config)
-            compare_convergences_SLAM(dataset, logs, logs_names)
-    else:
-        raise ValueError('Unsupported dataset : ' + plot_dataset)
+    # # Plot the validation
+    # if config.dataset_task == 'classification':
+    #     compare_convergences_classif(logs, logs_names)
+    # elif config.dataset_task == 'cloud_segmentation':
+    #     if config.dataset.startswith('S3DIS'):
+    #         dataset = S3DISDataset(config, load_data=False)
+    #         compare_convergences_segment(dataset, logs, logs_names)
+    #     else:
+    #         dataset = NPM3DDataset(config, load_data=False)
+    #         compare_convergences_segment(dataset, logs, logs_names)
+    # elif config.dataset_task == 'slam_segmentation':
+    #     if config.dataset.startswith('SemanticKitti'):
+    #         dataset = SemanticKittiDataset(config)
+    #         compare_convergences_SLAM(dataset, logs, logs_names)
+    # else:
+    #     raise ValueError('Unsupported dataset : ' + plot_dataset)
 
 
 

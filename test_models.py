@@ -33,6 +33,7 @@ from datasets.ModelNet40 import *
 from datasets.S3DIS import *
 from datasets.SemanticKitti import *
 from datasets.stjohns_NPM3D import *
+from datasets.stjohns_random_test import *
 from torch.utils.data import DataLoader
 
 from utils.config import Config
@@ -96,7 +97,8 @@ if __name__ == '__main__':
     #       > 'last_XXX': Automatically retrieve the last trained model on dataset XXX
     #       > '(old_)results/Log_YYYY-MM-DD_HH-MM-SS': Directly provide the path of a trained model
 
-    chosen_log = 'results/Log_2022-05-17_06-19-09'
+    #chosen_log = 'results/Log_2022-05-17_06-19-09'
+    chosen_log = 'results/00_st_johns_hpc/logs_kpconv/logs_kpconv/Log_2022-06-01_03-19-50'
 
     # Choose the index of the checkpoint to load OR None if you want to load the current checkpoint
     chkp_idx = -1
@@ -144,9 +146,9 @@ if __name__ == '__main__':
 
     #config.augment_noise = 0.0001
     #config.augment_symmetries = False
-    config.batch_num = 3
-    config.in_radius = 15
-    config.validation_size = 200
+    # config.batch_num = 3
+    config.in_radius = 25
+    # config.validation_size = 200
     config.input_threads = 1
 
     ##############
@@ -175,10 +177,14 @@ if __name__ == '__main__':
         test_dataset = SemanticKittiDataset(config, set=set, balance_classes=False)
         test_sampler = SemanticKittiSampler(test_dataset)
         collate_fn = SemanticKittiCollate
-    elif config.dataset == 'stjohns':
-        test_dataset = NPM3DDataset(config, set=set, use_potentials=True)
-        test_sampler = NPM3DSampler(test_dataset)
-        collate_fn = NPM3DCollate
+    # elif config.dataset == 'stjohns':
+    #     test_dataset = NPM3DDataset(config, set=set, use_potentials=True)
+    #     test_sampler = NPM3DSampler(test_dataset)
+    #     collate_fn = NPM3DCollate
+    elif config.dataset == 'stjohns': #stjohns random set
+        test_dataset = stjohnsrandomDataset(config, set=set, use_potentials=True)
+        test_sampler = stjohnsrandomSampler(test_dataset)
+        collate_fn = stjohnsrandomCollate
     else:
         raise ValueError('Unsupported dataset : ' + config.dataset)
 
