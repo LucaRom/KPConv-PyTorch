@@ -119,7 +119,9 @@ class NPM3DDataset(PointCloudDataset):
 
         # Dataset folder
         #self.path = '/mnt/data/' # Path windows
-        self.path = '/media/luca/SN750/00_Donnees_SSD/02_CCCOT/st_johns_lidar/raw_ply'
+        #self.path = '/media/luca/SN750/00_Donnees_SSD/02_CCCOT/st_johns_lidar/raw_ply'
+        self.path = '/KPConv-PyTorch/raw_ply'
+
 
         # Type of task conducted on this dataset
         self.dataset_task = 'cloud_segmentation'
@@ -155,6 +157,7 @@ class NPM3DDataset(PointCloudDataset):
         '''
 
         ply_path = join(self.path, self.train_path)          
+        print(ply_path)
         #las_path = join(self.path, self.original_las_path)
 
 

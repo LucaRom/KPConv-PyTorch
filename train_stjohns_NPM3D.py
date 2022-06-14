@@ -61,7 +61,7 @@ class NPM3DConfig(Config):
 
     # Number of CPU threads for the input pipeline
     #input_threads = 10
-    input_threads = 1
+    input_threads = 10
 
     #########################
     # Architecture definition
@@ -125,12 +125,12 @@ class NPM3DConfig(Config):
 
     # Radius of the input sphere (decrease value to reduce memory cost)
     # Units = meters
-    in_radius = 15
+    in_radius = 30
     #in_radius = 1.5
 
     # Size of the first subsampling grid in meter (increase value to reduce memory cost)
     #first_subsampling_dl = 0.06
-    first_subsampling_dl = 0.2
+    first_subsampling_dl = 0.5
 
     # Radius of convolution in "number grid cell". (2.5 is the standard value)
     conv_radius = 2.5
@@ -172,18 +172,18 @@ class NPM3DConfig(Config):
 
     # Maximal number of epochs
     #max_epoch = 500
-    max_epoch = 500
+    max_epoch = 100
 
     # Learning rate management
-    learning_rate = 1e-2
-    #learning_rate = 1e-3
+    #learning_rate = 1e-2
+    learning_rate = 1e-3
     momentum = 0.98
     lr_decays = {i: 0.1 ** (1 / 150) for i in range(1, max_epoch)}
     grad_clip_norm = 100.0
 
     # Number of batch (decrease to reduce memory cost, but it should remain > 3 for stability)
     #batch_num = 6
-    batch_num = 3
+    batch_num = 8
 
     # Number of steps per epochs
     epoch_steps = 500
