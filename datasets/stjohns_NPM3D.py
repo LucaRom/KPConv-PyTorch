@@ -119,7 +119,7 @@ class NPM3DDataset(PointCloudDataset):
 
         # Dataset folder
         #self.path = '/mnt/data/' # Path windows
-        self.path = '/media/luca/SN750/00_Donnees_SSD/02_CCCOT/st_johns_lidar/raw_ply'
+        self.path = '/mnt/SN750/00_Donnees_SSD/02_CCCOT/st_johns_lidar/raw_ply'
 
         # Type of task conducted on this dataset
         self.dataset_task = 'cloud_segmentation'
@@ -1002,6 +1002,15 @@ class NPM3DDataset(PointCloudDataset):
         # Get original points
         data = read_ply(file_path)
         return np.vstack((data['x'], data['y'], data['z'])).T
+
+    def load_original_targets(self, file_path):   # ajout LR
+        """
+        Load targets (from test split) on which the metrics should be evaluated
+        """
+
+        # Get original points
+        data = read_ply(file_path)
+        return np.vstack(data['class'])
 
 
 # ----------------------------------------------------------------------------------------------------------------------
