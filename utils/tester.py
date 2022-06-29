@@ -212,13 +212,14 @@ class ModelTester:
             test_path = None
 
         # If on validation directly compute score
+        #if test_loader.dataset.set == 'validation' or test_loader.dataset.set == 'test':
         if test_loader.dataset.set == 'validation':
             val_proportions = np.zeros(nc_model, dtype=np.float32)
             i = 0
             for label_value in test_loader.dataset.label_values:
                 if label_value not in test_loader.dataset.ignored_labels:
                     val_proportions[i] = np.sum([np.sum(labels == label_value)
-                                                 for labels in test_loader.dataset.validation_labels])
+                                                    for labels in test_loader.dataset.validation_labels])
                     i += 1
         else:
             val_proportions = None
@@ -228,7 +229,8 @@ class ModelTester:
         #####################
 
         test_epoch = 0
-        last_min = -0.5
+        #last_min = -0.5
+        last_min = 0.0
 
         t = [time.time()]
         last_display = time.time()
@@ -308,11 +310,14 @@ class ModelTester:
 
             # Save predicted cloud
             if last_min + 1 < new_min:
+            #if last_min + 0.1 < new_min:
+            #if new_min > 0.1:
 
                 # Update last_min
                 last_min += 1
 
                 # Show vote results (On subcloud so it is not the good values here)
+                #if test_loader.dataset.set == 'validation' or test_loader.dataset.set == 'test':
                 if test_loader.dataset.set == 'validation':
                     print('\nConfusion on sub clouds')
                     Confs = []
@@ -355,7 +360,8 @@ class ModelTester:
 
                 # Save real IoU once in a while
                 #if int(np.ceil(new_min)) % 10 == 0:
-                if int(np.ceil(new_min)) % 0.5 == 0:
+                #if int(np.ceil(new_min)) % 0.5 == 0:
+                if int(np.ceil(new_min)) % 1 == 0:
 
                     # Project predictions
                     print('\nReproject Vote #{:d}'.format(int(np.floor(new_min))))
@@ -426,12 +432,18 @@ class ModelTester:
                         # Get the predicted labels
                         preds = test_loader.dataset.label_values[np.argmax(proj_probs[i], axis=1)].astype(np.int32)
 
+                        # Get original target # LR
+                        #targets = test_loader.dataset.validation_labels[i]
+                        targets = test_loader.dataset.load_original_targets(file_path)
+
                         # Save plys
                         cloud_name = file_path.split('/')[-1]
                         test_name = join(test_path, 'predictions', cloud_name)
                         write_ply(test_name,
-                                  [points, preds],
-                                  ['x', 'y', 'z', 'preds'])
+                                  #[points, preds],
+                                  #['x', 'y', 'z', 'preds'])
+                                  [points, targets, preds],
+                                  ['x', 'y', 'z', 'targets', 'preds'])
                         test_name2 = join(test_path, 'probs', cloud_name)
                         prob_names = ['_'.join(test_loader.dataset.label_to_names[label].split())
                                       for label in test_loader.dataset.label_values]
@@ -774,7 +786,6 @@ class ModelTester:
                 break
 
         return
-
 
 
 

@@ -40,7 +40,8 @@ from utils.ply import read_ply
 from datasets.ModelNet40 import ModelNet40Dataset
 from datasets.S3DIS import S3DISDataset
 from datasets.SemanticKitti import SemanticKittiDataset
-from datasets.stjohns_NPM3D import NPM3DDataset
+#from datasets.stjohns_NPM3D import NPM3DDataset
+from datasets.nb_las import NPM3DDataset
 
 # ----------------------------------------------------------------------------------------------------------------------
 #
@@ -726,14 +727,17 @@ def experiment_name_1():
     #logs = np.sort([join(res_path, l) for l in listdir_str(res_path) if start <= l <= end])
 
     # Juste les logs 100 epochs
-    logs  = ['results/00_st_johns_hpc/logs_kpconv/logs_kpconv/Log_2022-05-30_05-53-18',     # '100_20_020'
-             'results/00_st_johns_hpc/logs_kpconv/logs_kpconv/Log_2022-05-30_14-46-07',     # '100_14_010
-             'results/00_st_johns_hpc/logs_kpconv/logs_kpconv/Log_2022-05-30_14-46-07',     # '100_14_010'   
-             'results/00_st_johns_hpc/logs_kpconv/logs_kpconv/Log_2022-05-31_06-51-50',     # '100_25_025'
-             'results/00_st_johns_hpc/logs_kpconv/logs_kpconv/Log_2022-05-31_12-48-58',     # '100_20_020'
-             'results/00_st_johns_hpc/logs_kpconv/logs_kpconv/Log_2022-05-31_18-00-20',     # '100_25_030'
-             'results/00_st_johns_hpc/logs_kpconv/logs_kpconv/Log_2022-05-31_23-32-49',     # '100_30_050'
-             'results/00_st_johns_hpc/logs_kpconv/logs_kpconv/Log_2022-06-01_03-19-50']     # '100_30_050'                  ]
+    # logs  = ['results/00_st_johns_hpc/logs_kpconv/logs_kpconv/Log_2022-05-30_05-53-18',     # '100_20_020'
+     #        'results/00_st_johns_hpc/logs_kpconv/logs_kpconv/Log_2022-05-30_14-46-07',     # '100_14_010
+     #        'results/00_st_johns_hpc/logs_kpconv/logs_kpconv/Log_2022-05-30_14-46-07',     # '100_14_010'   
+     #        'results/00_st_johns_hpc/logs_kpconv/logs_kpconv/Log_2022-05-31_06-51-50',     # '100_25_025'
+     #        'results/00_st_johns_hpc/logs_kpconv/logs_kpconv/Log_2022-05-31_12-48-58',     # '100_20_020'
+     #        'results/00_st_johns_hpc/logs_kpconv/logs_kpconv/Log_2022-05-31_18-00-20',     # '100_25_030'
+     #        'results/00_st_johns_hpc/logs_kpconv/logs_kpconv/Log_2022-05-31_23-32-49',     # '100_30_050'
+     #        'results/00_st_johns_hpc/logs_kpconv/logs_kpconv/Log_2022-06-01_03-19-50']     # '100_30_050'                  ]
+
+    #logs = ['/space/partner/nrcan/geobase/work/transfer/work/deep_learning/lidar/luca/KPConv-PyTorch/results/Log_2022-06-20_02-10-36']
+    logs = ['/KPConv-PyTorch/results/Log_2022-06-22_03-43-17']
 
     # Give names to the logs (for plot legends)
     # logs_names = ['name_log_1',
@@ -766,13 +770,15 @@ def experiment_name_1():
     #               '100_30_050']    # Log_2022-06-01_03-19-50
 
     # Logs avec 100 epochs
-    logs_names = ['100_20_020',    # Log_2022-05-30_05-53-18
-                  '100_14_010',    # Log_2022-05-30_14-46-07
-                  '100_25_025',    # Log_2022-05-31_06-51-50
-                  '100_20_020',    # Log_2022-05-31_12-48-58
-                  '100_25_030',    # Log_2022-05-31_18-00-20
-                  '100_30_050',    # Log_2022-05-31_23-32-49
-                  '100_30_050_8']    # Log_2022-06-01_03-19-50
+    #logs_names = ['100_20_020',    # Log_2022-05-30_05-53-18
+    #              '100_14_010',    # Log_2022-05-30_14-46-07
+    #              '100_25_025',    # Log_2022-05-31_06-51-50
+    #              '100_20_020',    # Log_2022-05-31_12-48-58
+    #              '100_25_030',    # Log_2022-05-31_18-00-20
+    #              '100_30_050',    # Log_2022-05-31_23-32-49
+    #              '100_30_050_8']    # Log_2022-06-01_03-19-50
+
+    logs_names = ['NB_stjean']
 
     # safe check log names
     logs_names = np.array(logs_names[:len(logs)])
@@ -852,7 +858,7 @@ if __name__ == '__main__':
             plot_dataset = this_dataset
 
     # Plot the training loss and accuracy
-    compare_trainings(logs, logs_names)
+    #compare_trainings(logs, logs_names)
     dataset = NPM3DDataset(config, load_data=False)
     compare_convergences_segment(dataset, logs, logs_names)
 
