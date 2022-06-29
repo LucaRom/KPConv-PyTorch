@@ -1,5 +1,3 @@
-from http.client import METHOD_NOT_ALLOWED
-
 from matplotlib import matplotlib_fname
 from ply import read_ply
 import matplotlib.pyplot as plt
